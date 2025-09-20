@@ -1,70 +1,121 @@
 datasource db {
-    provider = "postgresql"
-    url = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
-
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
-
 enum Role {
-    Employee
-    Manager
-    Admin
+  Employee
+  Manager
+  Admin
 }
 
 enum LeaveStatus {
-    Draft
-    Submitted
-    Approved
-    Rejected
+  Draft
+  Submitted
+  Approved
+  Rejected
+}
+
+enum ExpenditureStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum Currency {
+  TRY
+  USD
+  EUR
+  GBP
 }
 
 model User {
-    id String @id @default(uuid())
-    email String @unique
-    passwordHash String
-    firstName String
-    lastName String
-    role Role
-    isActive Boolean @default(true)
-    companyId String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    leaveRequests       LeaveRequest[] @relation("EmployeeLeaveRequests")
-    managedLeaveRequests LeaveRequest[] @relation("ManagerApprovals")
+  id                   String               @id @default(uuid())
+  email                String               @unique
+  passwordHash         String
+  firstName            String
+  lastName             String
+  role                 Role
+  isActive             Boolean              @default(true)
+  companyId            String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  leaveRequests        LeaveRequest[]       @relation("EmployeeLeaveRequests")
+  managedLeaveRequests LeaveRequest[]       @relation("ManagerApprovals")
+  expenditureRequests  ExpenditureRequest[] @relation("EmployeeExpenditureRequests")
+  managedExpenditures  ExpenditureRequest[] @relation("ManagerExpenditureApprovals")
 }
 
 model LeaveType {
-    id String @id @default(uuid())
-    name String
-    defaultDay Int?
-    gender String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  name       String
+  defaultDay Int?
+  gender     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-    leaveRequests LeaveRequest[]
+  leaveRequests LeaveRequest[]
 }
 
-
 model LeaveRequest {
-    id String @id @default(uuid())
-    employeeId String
-    employee User @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id])
-    leaveTypeId String
-    leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
-    startDate DateTime
-    endDate DateTime
-    reason String
-    status LeaveStatus @default(Draft)
-    managerId String?
-    manager User? @relation("ManagerApprovals", fields: [managerId], references: [id])
-    decisionNote String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id           String      @id @default(uuid())
+  employeeId   String
+  employee     User        @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id])
+  leaveTypeId  String
+  leaveType    LeaveType   @relation(fields: [leaveTypeId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  reason       String
+  status       LeaveStatus @default(Draft)
+  managerId    String?
+  manager      User?       @relation("ManagerApprovals", fields: [managerId], references: [id])
+  decisionNote String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-    @@index([employeeId])
-    @@index([status])
+  @@index([employeeId])
+  @@index([status])
+}
+
+model ExpenditureType {
+  id        String   @id @default(uuid())
+  name      String
+  minPrice  Decimal? @db.Decimal(12, 2)
+  maxPrice  Decimal? @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requests ExpenditureRequest[]
+}
+
+model ExpenditureRequest {
+  id       String    @id @default(uuid())
+  title    String
+  currency Currency?
+  amount   Decimal   @db.Decimal(12, 2)
+  imageUrl String?
+
+  expenditureTypeId String
+  expenditureType   ExpenditureType @relation(fields: [expenditureTypeId], references: [id])
+
+  employeeId String
+  employee   User   @relation("EmployeeExpenditureRequests", fields: [employeeId], references: [id])
+
+  status       ExpenditureStatus @default(Pending)
+  requestDate  DateTime          @default(now())
+  approvalDate DateTime?
+
+  managerId String?
+  manager   User?   @relation("ManagerExpenditureApprovals", fields: [managerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId])
+  @@index([status])
+  @@index([createdAt])
 }

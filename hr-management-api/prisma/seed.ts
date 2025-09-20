@@ -187,11 +187,114 @@ async function main() {
         decisionNote: "Ekip yoğun",
         },
     });
+    // ---- Expenditure Types ----
+    await prisma.expenditureType.upsert({
+        where: { id: "20000000-0000-0000-0000-000000000001" },
+        update: { name: "Travel", minPrice: 0, maxPrice: 1000 },
+        create: { id: "20000000-0000-0000-0000-000000000001", name: "Travel", minPrice: 0, maxPrice: 1000 },
+    });
+    await prisma.expenditureType.upsert({
+        where: { id: "20000000-0000-0000-0000-000000000002" },
+        update: { name: "Meal", minPrice: 0, maxPrice: 150 },
+        create: { id: "20000000-0000-0000-0000-000000000002", name: "Meal", minPrice: 0, maxPrice: 150 },
+    });
+    await prisma.expenditureType.upsert({
+        where: { id: "20000000-0000-0000-0000-000000000003" },
+        update: { name: "Lodging", minPrice: 0, maxPrice: 500 },
+        create: { id: "20000000-0000-0000-0000-000000000003", name: "Lodging", minPrice: 0, maxPrice: 500 },
+    });
 
+    const travelTypeId = "20000000-0000-0000-0000-000000000001";
+    const mealTypeId   = "20000000-0000-0000-0000-000000000002";
+
+    // ---- Expenditure Requests (sample) ----
+    // employee1 → Pending
+    await prisma.expenditureRequest.upsert({
+        where: { id: "21111111-1111-1111-1111-111111111001" },
+        update: {
+        employeeId: employee1.id,
+        expenditureTypeId: travelTypeId,
+        title: "İstanbul - Ankara otobüs bileti",
+        currency: "TRY",
+        amount: 450.0,
+        imageUrl: null,
+        status: "Pending",
+        managerId: null,
+        approvalDate: null,
+        },
+        create: {
+        id: "21111111-1111-1111-1111-111111111001",
+        employeeId: employee1.id,
+        expenditureTypeId: travelTypeId,
+        title: "İstanbul - Ankara otobüs bileti",
+        currency: "TRY",
+        amount: 450.0,
+        imageUrl: null,
+        status: "Pending",
+        },
+    });
+
+    // employee2 → Approved
+    await prisma.expenditureRequest.upsert({
+        where: { id: "21111111-1111-1111-1111-111111111002" },
+        update: {
+        employeeId: employee2.id,
+        expenditureTypeId: mealTypeId,
+        title: "Müşteri toplantısı öğle yemeği",
+        currency: "EUR",
+        amount: 32.5,
+        imageUrl: null,
+        status: "Approved",
+        managerId: manager.id,
+        approvalDate: new Date("2025-09-10"),
+        },
+        create: {
+        id: "21111111-1111-1111-1111-111111111002",
+        employeeId: employee2.id,
+        expenditureTypeId: mealTypeId,
+        title: "Müşteri toplantısı öğle yemeği",
+        currency: "EUR",
+        amount: 32.5,
+        imageUrl: null,
+        status: "Approved",
+        managerId: manager.id,
+        approvalDate: new Date("2025-09-10"),
+        },
+    });
+
+    // employee2 → Rejected
+    await prisma.expenditureRequest.upsert({
+        where: { id: "21111111-1111-1111-1111-111111111003" },
+        update: {
+        employeeId: employee2.id,
+        expenditureTypeId: travelTypeId,
+        title: "Şehir içi taksi",
+        currency: "EUR",
+        amount: 120,
+        imageUrl: null,
+        status: "Rejected",
+        managerId: manager.id,
+        approvalDate: new Date("2025-09-12"),
+        },
+        create: {
+        id: "21111111-1111-1111-1111-111111111003",
+        employeeId: employee2.id,
+        expenditureTypeId: travelTypeId,
+        title: "Şehir içi taksi",
+        currency: "EUR",
+        amount: 120,
+        imageUrl: null,
+        status: "Rejected",
+        managerId: manager.id,
+        approvalDate: new Date("2025-09-12"),
+        },
+    });
 
     console.log("Seed completed");
 }
 
 
-main().finally(() => prisma.$disconnect());
-
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+}).finally(() => prisma.$disconnect());

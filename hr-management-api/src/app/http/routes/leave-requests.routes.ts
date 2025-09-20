@@ -19,7 +19,7 @@ r.post("/:id/approve", requireAuth, requireRole("Manager", "Admin"), approve);
 r.post("/:id/reject", requireAuth, requireRole("Manager", "Admin"), reject);
 
 
-// Detail (role’a göre erişim kontrolü içeride)
+// Detail
 r.get("/:id", requireAuth, detail);
 
 
