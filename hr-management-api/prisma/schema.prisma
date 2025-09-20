@@ -43,6 +43,10 @@ model User {
   isActive     Boolean  @default(true)
   companyId    String
   company      Company  @relation(fields: [companyId], references: [id])
+  managerId    String?
+  manager      User?    @relation("UserManager", fields: [managerId], references: [id])
+  reports      User[]   @relation("UserManager")
+
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -53,6 +57,7 @@ model User {
   managedExpenditures ExpenditureRequest[] @relation("ManagerExpenditureApprovals")
 
   @@index([companyId])
+  @@index([managerId])
 }
 
 model LeaveType {

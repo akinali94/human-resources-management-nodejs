@@ -10,6 +10,7 @@ import {
   rejectRequest,
   requestDetail,
 } from "../controllers/expenditures.controller.js";
+import { requireCompanyScope } from "../middlewares/company.scope.guard.js";
 
 const r = Router();
 
@@ -21,9 +22,9 @@ r.get("/requests/my", requireAuth, listMyRequests);
 r.post("/requests", requireAuth, createRequest);
 
 // Manager/Admin
-r.get("/requests/pending", requireAuth, requireRole("Manager", "Admin"), listPendingRequests);
-r.post("/requests/:id/approve", requireAuth, requireRole("Manager", "Admin"), approveRequest);
-r.post("/requests/:id/reject", requireAuth, requireRole("Manager", "Admin"), rejectRequest);
+r.get("/requests/pending", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, listPendingRequests);
+r.post("/requests/:id/approve", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, approveRequest);
+r.post("/requests/:id/reject", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, rejectRequest);
 
 // Detail
 r.get("/requests/:id", requireAuth, requestDetail);

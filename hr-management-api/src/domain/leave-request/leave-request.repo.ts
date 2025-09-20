@@ -4,6 +4,7 @@ import type { LeaveRequestDomain, LeaveStatus } from "./leave-request.entity.js"
 export interface LeaveRequestRepo {
 listByEmployee(employeeId: string, status?: LeaveStatus): Promise<LeaveRequestDomain[]>;
 listByStatus(status: LeaveStatus): Promise<LeaveRequestDomain[]>;
+listPendingForManager(managerId: string, companyId: string): Promise<LeaveRequestDomain[]>;
 createDraft(input: {
 employeeId: string;
 leaveTypeId: string;

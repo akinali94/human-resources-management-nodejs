@@ -1,26 +1,28 @@
 import { Router } from "express";
 import { requireAuth } from "../../../infra/auth/session.js";
 import { requireRole } from "../middlewares/role.guard.js";
-import { listMy, createDraft, submit, listPending, approve, reject, detail } from "../controllers/leave-requests.controller.js"
-
+import * as c from "../controllers/leave-requests.controller.js"
+import { requireCompanyScope } from "../middlewares/company.scope.guard.js";
 
 const r = Router();
 
 
 // Employee
-r.get("/my", requireAuth, listMy);
-r.post("/", requireAuth, createDraft);
-r.post("/:id/submit", requireAuth, submit);
+r.get("/my", requireAuth, c.listMy);
+r.post("/", requireAuth, c.createDraft);
+r.post("/:id/submit", requireAuth, c.submit);
 
 
 // Manager
-r.get("/pending", requireAuth, requireRole("Manager", "Admin"), listPending);
-r.post("/:id/approve", requireAuth, requireRole("Manager", "Admin"), approve);
-r.post("/:id/reject", requireAuth, requireRole("Manager", "Admin"), reject);
-
+r.get("/pending", requireAuth, requireRole("Manager", "Admin"), c.listPending);
+r.post("/:id/approve", requireAuth, requireRole("Manager", "Admin"), c.approve);
+r.post("/:id/reject", requireAuth, requireRole("Manager", "Admin"), c.reject);
+r.get("/pending", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, c.listPending);
+r.post("/:id/approve", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, c.approve);
+r.post("/:id/reject", requireAuth, requireRole("Manager", "Admin"), requireCompanyScope, c.reject);
 
 // Detail
-r.get("/:id", requireAuth, detail);
+r.get("/:id", requireAuth, c.detail);
 
 
 export default r;

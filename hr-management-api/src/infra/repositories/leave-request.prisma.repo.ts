@@ -34,6 +34,17 @@ const rows = await prisma.leaveRequest.findMany({ where: { status: status }, ord
 return rows.map(toDomain);
 }
 
+  async listPendingForManager(managerId: string, companyId: string): Promise<LeaveRequestDomain[]> {
+    const rows = await prisma.leaveRequest.findMany({
+      where: {
+        status: "Submitted",
+        employee: { managerId, companyId },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map(toDomain);
+  }
+
 
 async createDraft(input: { employeeId: string; leaveTypeId: string; startDate: string; endDate: string; reason: string; }): Promise<{ id: string; status: LeaveStatus; createdAt: Date; }> {
 const created = await prisma.leaveRequest.create({
@@ -51,11 +62,27 @@ return { id: created.id, status: created.status as LeaveStatus, createdAt: creat
 
 
 async submitDraft(id: string, employeeId: string): Promise<boolean> {
-const result = await prisma.leaveRequest.updateMany({
-where: { id, employeeId, status: "Draft" },
-data: { status: "Submitted" },
-});
-return result.count > 0;
+    const lr = await prisma.leaveRequest.findFirst({ where: { id, employeeId, status: "Draft" } });
+    if (!lr) return false;
+    // Overlap kontrolü: aynı çalışan, Submitted/Approved ile çakışıyor mu?
+    const overlap = await prisma.leaveRequest.findFirst({
+      where: {
+        id: { not: lr.id },
+        employeeId: lr.employeeId,
+        status: { in: ["Submitted", "Approved"] },
+        startDate: { lte: lr.endDate },
+        endDate: { gte: lr.startDate },
+      },
+    });
+    if (overlap) return false;
+    // defaultDay sınırı (varsa)
+    const lt = await prisma.leaveType.findUnique({ where: { id: lr.leaveTypeId } });
+    if (lt?.defaultDay != null) {
+      const days = Math.floor((Number(lr.endDate) - Number(lr.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+      if (days > lt.defaultDay) return false;
+    }
+    const result = await prisma.leaveRequest.updateMany({ where: { id, employeeId, status: "Draft" }, data: { status: "Submitted" } });
+    return result.count > 0;
 }
 
 

@@ -97,6 +97,8 @@ async function main() {
     if (!manager || !employee1 || !employee2)
         throw new Error("Seed: users not found after upsert");
 
+    await prisma.user.update({ where: { id: employee1.id }, data: { managerId: manager.id } });
+    await prisma.user.update({ where: { id: employee2.id }, data: { managerId: manager.id } });    
     // Leave types
     await prisma.leaveType.upsert({
         where: { id: "00000000-0000-0000-0000-000000000001" },

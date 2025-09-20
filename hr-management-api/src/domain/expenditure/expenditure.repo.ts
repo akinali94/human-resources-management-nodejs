@@ -20,6 +20,7 @@ export interface ExpenditureRepo {
   // ---- Requests ----
   listRequestsByEmployee(employeeId: string, status?: ExpenditureApprovalStatus): Promise<ExpenditureRequest[]>;
   listRequestsByStatus(status: ExpenditureApprovalStatus): Promise<ExpenditureRequest[]>;
+  listPendingForManager(managerId: string, companyId: string): Promise<ExpenditureRequest[]>;
   createRequest(input: CreateExpenditureRequestInput): Promise<{ id: string; status: ExpenditureApprovalStatus; createdAt: Date }>;
   approveRequest(id: string, input: DecideExpenditureRequestInput): Promise<boolean>;
   rejectRequest(id: string, input: DecideExpenditureRequestInput & { reason?: string | null }): Promise<boolean>;

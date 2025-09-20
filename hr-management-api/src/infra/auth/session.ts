@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import type { Role } from "../../domain/user/user.entity.ts";
 import type { Response, Request, NextFunction } from "express";
 import { env } from "../../config/env.js"
+import { prisma } from "../db/prisma.client.js";
 
 
 const COOKIE_NAME = "session";
@@ -37,8 +38,8 @@ export function clearSessionCookie(res: Response) {
     });
 }
 
-
-export type AuthPayload = { userId: string; role: Role };
+//we will add company scope on middleware, because of this companyId is optional
+export type AuthPayload = { userId: string; role: Role; companyId?: string };
 
 
 export function requireAuth(req: Request & { auth?: AuthPayload }, res: Response, next: NextFunction) {

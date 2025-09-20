@@ -6,8 +6,11 @@ import {
 } from "../dtos/expenditures.dto.js";
 import { ExpenditurePrismaRepo } from "../../../infra/repositories/expenditure.prisma.repo.js";
 import type { ExpenditureApprovalStatus } from "../../../domain/expenditure/expenditure.entity.ts";
+import { CompanyPrismaRepo } from "../../../infra/repositories/company.prisma.repo.js";
+import { env } from "../../../config/env.js";
 
 const repo = new ExpenditurePrismaRepo();
+const companyRepo = new CompanyPrismaRepo();
 
 const ALLOWED_STATUSES: ReadonlySet<ExpenditureApprovalStatus> =
   new Set(["Pending", "Approved", "Rejected"]);
@@ -51,10 +54,7 @@ export async function listTypes(_req: Request, res: Response) {
 }
 
 // ---- REQUESTS (Employee) ----
-export async function listMyRequests(
-  req: Request & { auth?: { userId: string } },
-  res: Response
-) {
+export async function listMyRequests(req: Request, res: Response) {
   if (!req.auth)
     return res
       .status(401)
@@ -68,10 +68,7 @@ export async function listMyRequests(
   return res.json({ items: items.map(sanitizeReq) });
 }
 
-export async function createRequest(
-  req: Request & { auth?: { userId: string } },
-  res: Response
-) {
+export async function createRequest(req: Request, res: Response) {
   try {
     if (!req.auth)
       return res
@@ -79,7 +76,22 @@ export async function createRequest(
         .json({ error: { code: "UNAUTHORIZED", message: "No session" } });
 
     const body = CreateExpenditureRequestBody.parse(req.body);
-
+    // Company aktif mi?
+    if (req.auth.companyId) {
+      const company = await companyRepo.findById(req.auth.companyId);
+      if (!company || !company.isActive) return res.status(403).json({ error: { code: "FORBIDDEN", message: "Company inactive" } });
+    }
+    // Type range kontrolü (opsiyonel - env ile)
+    if (env.ENFORCE_EXPENDITURE_RANGE) {
+      const t = await repo.findTypeById(body.expenditureTypeId);
+      if (!t) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "Invalid expenditureTypeId" } });
+      if (t.minPrice != null && body.amount < t.minPrice) {
+        return res.status(409).json({ error: { code: "CONFLICT", message: "Amount below minPrice" } });
+      }
+      if (t.maxPrice != null && body.amount > t.maxPrice) {
+        return res.status(409).json({ error: { code: "CONFLICT", message: "Amount above maxPrice" } });
+      }
+    }
     const created = await repo.createRequest({
       employeeId: req.auth.userId,
       title: body.title,
@@ -106,15 +118,13 @@ export async function createRequest(
 }
 
 // ---- REQUESTS (Manager/Admin) ----
-export async function listPendingRequests(_req: Request, res: Response) {
-  const items = await repo.listRequestsByStatus("Pending");
+export async function listPendingRequests(req: Request, res: Response) {
+  if (!req.auth?.companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
+  const items = await repo.listPendingForManager(req.auth.userId, req.auth.companyId);
   return res.json({ items: items.map(sanitizeReq) });
 }
 
-export async function approveRequest(
-  req: Request & { auth?: { userId: string } },
-  res: Response
-) {
+export async function approveRequest(req: Request, res: Response) {
   try {
     const id = requireIdParam(req);
     if (!id)
@@ -147,10 +157,7 @@ export async function approveRequest(
   }
 }
 
-export async function rejectRequest(
-  req: Request & { auth?: { userId: string } },
-  res: Response
-) {
+export async function rejectRequest(req: Request, res: Response) {
   try {
     const id = requireIdParam(req);
     if (!id)
@@ -183,10 +190,7 @@ export async function rejectRequest(
   }
 }
 
-export async function requestDetail(
-  req: Request & { auth?: { userId: string; role?: string } },
-  res: Response
-) {
+export async function requestDetail(req: Request, res: Response) {
   const id = requireIdParam(req);
   if (!id)
     return res
@@ -199,7 +203,7 @@ export async function requestDetail(
       .status(404)
       .json({ error: { code: "NOT_FOUND", message: "Expenditure request not found" } });
 
-  // Erişim: employee → kendi talebi; manager/admin → hepsi
+  // Access: employee → own request; manager/admin → all
   const role = req.auth?.role;
   if (!role)
     return res

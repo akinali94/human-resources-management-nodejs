@@ -104,6 +104,17 @@ export class ExpenditurePrismaRepo implements ExpenditureRepo {
     return rows.map(toRequest);
   }
 
+  async listPendingForManager(managerId: string, companyId: string): Promise<ExpenditureRequest[]> {
+    const rows = await prisma.expenditureRequest.findMany({
+      where: {
+        status: "Pending",
+        employee: { managerId, companyId },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+    return rows.map(toRequest);
+  }
+
   async createRequest(input: CreateExpenditureRequestInput): Promise<{ id: string; status: ExpenditureApprovalStatus; createdAt: Date }> {
     const row = await prisma.expenditureRequest.create({
       data: {

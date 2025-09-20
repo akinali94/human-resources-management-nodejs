@@ -2,11 +2,13 @@ import type { Request, Response } from "express";
 import { CreateLeaveRequestBody, ApproveBody, RejectBody } from "../dtos/leave-request.dto.js"
 import { LeaveRequestPrismaRepo } from "../../../infra/repositories/leave-request.prisma.repo.js";
 import { LeaveTypePrismaRepo } from "../../../infra/repositories/leave-types.prisma.repo.js";
+import { CompanyPrismaRepo } from "../../../infra/repositories/company.prisma.repo.js";
 import type { LeaveStatus } from "../../../domain/leave-request/leave-request.entity.js";
 
 
 const leaveRepo = new LeaveRequestPrismaRepo();
 const leaveTypeRepo = new LeaveTypePrismaRepo();
+const companyRepo = new CompanyPrismaRepo();
 
 const ALLOWED_STATUSES = new Set(["Draft", "Submitted", "Approved", "Rejected"]);
 
@@ -46,7 +48,7 @@ function requireIdParam(req: Request): string | null {
 
 
 
-export async function listMy(req: Request & { auth?: { userId: string } }, res: Response) {
+export async function listMy(req: Request, res: Response) {
   if (!req.auth)
     return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
   const status = req.query.status as LeaveStatus | undefined;
@@ -57,11 +59,18 @@ export async function listMy(req: Request & { auth?: { userId: string } }, res: 
 }
 
 
-export async function createDraft(req: Request & { auth?: { userId: string } }, res: Response) {
+export async function createDraft(req: Request, res: Response) {
     try {
         if (!req.auth)
             return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
         const body = CreateLeaveRequestBody.parse(req.body);
+
+        if(req.auth.companyId){
+          const company = await companyRepo.findById(req.auth.companyId);
+          if (!company || !(company.isActive))
+            return res.status(403).json({ error: { code: "FORBIDDEN", message: "Company inactive" } });
+
+        }
 
         const lt = await leaveTypeRepo.findById(body.leaveTypeId);
         if (!lt)
@@ -84,7 +93,7 @@ export async function createDraft(req: Request & { auth?: { userId: string } }, 
     }
 }
 
-export async function submit(req: Request & { auth?: { userId: string } }, res: Response) {
+export async function submit(req: Request, res: Response) {
   if (!req.auth)
     return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
   const id = requireIdParam(req)
@@ -96,12 +105,13 @@ export async function submit(req: Request & { auth?: { userId: string } }, res: 
   return res.json({ id, status: "Submitted" });
 }
 
-export async function listPending(_req: Request, res: Response) {
-  const items = await leaveRepo.listByStatus("Submitted");
+export async function listPending(req: Request & { auth?: { userId: string; companyId?: string } }, res: Response) {
+  if (!req.auth?.companyId) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
+  const items = await leaveRepo.listPendingForManager(req.auth.userId, req.auth.companyId);
   return res.json({ items: items.map((x) => sanitize(x)) });
 }
 
-export async function approve(req: Request & { auth?: { userId: string } }, res: Response) {
+export async function approve(req: Request, res: Response) {
   try {
     const id = requireIdParam(req)
     if (!id) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "id param is required" } });
@@ -119,7 +129,7 @@ export async function approve(req: Request & { auth?: { userId: string } }, res:
   }
 }
 
-export async function reject(req: Request & { auth?: { userId: string } }, res: Response) {
+export async function reject(req: Request, res: Response) {
   try {
     const id = requireIdParam(req);
     if (!id) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "id param is required" } });
@@ -136,7 +146,7 @@ export async function reject(req: Request & { auth?: { userId: string } }, res: 
   }
 }
 
-export async function detail(req: Request & { auth?: { userId: string; role?: string } }, res: Response) {
+export async function detail(req: Request, res: Response) {
     const id = requireIdParam(req);
     if (!id) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "id param is required" } });
     const lr = await leaveRepo.findById(id);
