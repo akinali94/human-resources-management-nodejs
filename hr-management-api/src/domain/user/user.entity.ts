@@ -20,7 +20,7 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface CreateUserInput {
+export interface CreateUserInput { //For infra layer
   email: string;
   passwordHash: string;
   firstName: string;
