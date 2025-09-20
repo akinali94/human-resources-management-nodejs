@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { CreateLeaveRequestBody, ApproveBody, RejectBody } from "../dtos/leave-request.dto.js"
 import { LeaveRequestPrismaRepo } from "../../../infra/repositories/leave-request.prisma.repo.js";
-import { LeaveTypePrismaRepo } from "../../../infra/repositories/leave-type.prisma.repo.js";
+import { LeaveTypePrismaRepo } from "../../../infra/repositories/leave-types.prisma.repo.js";
 import type { LeaveStatus } from "../../../domain/leave-request/leave-request.entity.js";
 
 
