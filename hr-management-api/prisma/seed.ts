@@ -8,6 +8,37 @@ const prisma = new PrismaClient();
 async function main() {
     const pwd = await hashPassword("Passw0rd!");
 
+    await prisma.company.upsert({
+        where: { id: "30000000-0000-0000-0000-000000000001" },
+        update: { name: "Hr Management Company", isActive: true },
+        create: {
+        id: "30000000-0000-0000-0000-000000000001",
+        name: "Hr Management Company",
+        title: "Technology",
+        telephoneNumber: "+90 212 000 00 00",
+        address: "İstanbul",
+        email: "info@hrmanagementcompany.com",
+        isActive: true,
+        },
+    });
+
+    await prisma.company.upsert({
+        where: { id: "30000000-0000-0000-0000-000000000002" },
+        update: { name: "Acme Corp", isActive: true },
+        create: {
+        id: "30000000-0000-0000-0000-000000000002",
+        name: "Acme Corp",
+        title: "Consulting",
+        telephoneNumber: "+352 20 00 00",
+        address: "Luxembourg",
+        email: "contact@acme.example",
+        isActive: true,
+        },
+    });
+
+    const hrCompanyId = "30000000-0000-0000-0000-000000000001";
+    const acmeId  = "30000000-0000-0000-0000-000000000002";
+
     await prisma.user.upsert({
         where: { email: "admin@example.com" },
         update: {},
@@ -17,6 +48,7 @@ async function main() {
             firstName: "Ada",
             lastName: "Min",
             role: "Admin",
+            companyId: hrCompanyId,
         },
     });
 
@@ -29,6 +61,7 @@ async function main() {
             firstName: "Mona",
             lastName: "Ger",
             role: "Manager",
+            companyId: acmeId,
         },
     });
 
@@ -41,6 +74,7 @@ async function main() {
             firstName: "Emil",
             lastName: "Ployee",
             role: "Employee",
+            companyId: acmeId,
         },
     });
 
@@ -53,6 +87,7 @@ async function main() {
             firstName: "Emma",
             lastName: "Ployee",
             role: "Employee",
+            companyId: acmeId,
         },
     });
 

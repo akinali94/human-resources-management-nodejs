@@ -30,3 +30,4 @@ logs
 test.env
 
 docker-compose.yaml
+prisma/migrations/*

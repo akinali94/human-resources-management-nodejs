@@ -34,20 +34,25 @@ enum Currency {
 }
 
 model User {
-  id                   String               @id @default(uuid())
-  email                String               @unique
-  passwordHash         String
-  firstName            String
-  lastName             String
-  role                 Role
-  isActive             Boolean              @default(true)
-  companyId            String?
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  leaveRequests        LeaveRequest[]       @relation("EmployeeLeaveRequests")
-  managedLeaveRequests LeaveRequest[]       @relation("ManagerApprovals")
-  expenditureRequests  ExpenditureRequest[] @relation("EmployeeExpenditureRequests")
-  managedExpenditures  ExpenditureRequest[] @relation("ManagerExpenditureApprovals")
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role
+  isActive     Boolean  @default(true)
+  companyId    String
+  company      Company  @relation(fields: [companyId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  leaveRequests        LeaveRequest[] @relation("EmployeeLeaveRequests")
+  managedLeaveRequests LeaveRequest[] @relation("ManagerApprovals")
+
+  expenditureRequests ExpenditureRequest[] @relation("EmployeeExpenditureRequests")
+  managedExpenditures ExpenditureRequest[] @relation("ManagerExpenditureApprovals")
+
+  @@index([companyId])
 }
 
 model LeaveType {
@@ -118,4 +123,25 @@ model ExpenditureRequest {
   @@index([employeeId])
   @@index([status])
   @@index([createdAt])
+}
+
+model Company {
+  id                String    @id @default(uuid())
+  name              String    @unique
+  title             String?
+  mersisNo          String?
+  taxNumber         String?
+  logo              String?
+  telephoneNumber   String?
+  address           String?
+  email             String?
+  employeeNumber    String?
+  foundationYear    DateTime?
+  contractStartDate DateTime?
+  contractEndDate   DateTime?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  users User[]
 }

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../../../infra/auth/session.js";
 import { requireRole } from "../middlewares/role.guard.js";
-import { listMy, createDraft, submit, listPending, approve, reject, detail } from "../controllers/leave-requests.controller.js";
+import { listMy, createDraft, submit, listPending, approve, reject, detail } from "../controllers/leave-requests.controller.js"
 
 
 const r = Router();
