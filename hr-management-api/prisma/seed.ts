@@ -1,5 +1,5 @@
 import { PrismaClient, Role } from "@prisma/client";
-import { hashPassword } from "../src/infra/auth/password.ts";
+import { hashPassword } from "../src/infra/auth/password.js";
 
 
 const prisma = new PrismaClient();
@@ -56,7 +56,19 @@ async function main() {
         },
     });
 
+    // Leave types
+    await prisma.leaveType.upsert({
+        where: { id: "00000000-0000-0000-0000-000000000001" },
+        update: { name: "Annual" },
+        create: { id: "00000000-0000-0000-0000-000000000001", name: "Annual", defaultDay: 14 },
+    });
 
+    await prisma.leaveType.upsert({
+        where: { id: "00000000-0000-0000-0000-000000000002" },
+        update: { name: "Sick" },
+        create: { id: "00000000-0000-0000-0000-000000000002", name: "Sick", defaultDay: 5 },
+    });
+    
     console.log("Seed completed");
 
 }

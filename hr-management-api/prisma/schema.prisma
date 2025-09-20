@@ -15,6 +15,12 @@ enum Role {
     Admin
 }
 
+enum LeaveStatus {
+    Draft
+    Submitted
+    Approved
+    Rejected
+}
 
 model User {
     id String @id @default(uuid())
@@ -27,4 +33,38 @@ model User {
     companyId String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    leaveRequests       LeaveRequest[] @relation("EmployeeLeaveRequests")
+    managedLeaveRequests LeaveRequest[] @relation("ManagerApprovals")
+}
+
+model LeaveType {
+    id String @id @default(uuid())
+    name String
+    defaultDay Int?
+    gender String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    leaveRequests LeaveRequest[]
+}
+
+
+model LeaveRequest {
+    id String @id @default(uuid())
+    employeeId String
+    employee User @relation("EmployeeLeaveRequests", fields: [employeeId], references: [id])
+    leaveTypeId String
+    leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+    startDate DateTime
+    endDate DateTime
+    reason String
+    status LeaveStatus @default(Draft)
+    managerId String?
+    manager User? @relation("ManagerApprovals", fields: [managerId], references: [id])
+    decisionNote String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([employeeId])
+    @@index([status])
 }
