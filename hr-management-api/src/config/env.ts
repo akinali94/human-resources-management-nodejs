@@ -14,6 +14,12 @@ const EnvSchema = z.object({
         if (typeof v === "string") return v.toLowerCase() === "true";
         return false; // default
         }),
+    CORS_ORIGINS: z.string().optional().transform((s) =>
+        (s ?? "http://localhost:5173,http://localhost:3001")
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean)
+    ),
 });
 
 
@@ -25,4 +31,5 @@ export const env = {
   NODE_ENV: parsed.NODE_ENV,
   PORT: parsed.PORT,
   ENFORCE_EXPENDITURE_RANGE: parsed.ENFORCE_EXPENDITURE_RANGE as boolean,
+  CORS_ORIGINS: parsed.CORS_ORIGINS as string[],
 }
