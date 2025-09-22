@@ -34,18 +34,37 @@ enum Currency {
 }
 
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         Role
-  isActive     Boolean @default(true)
-  companyId    String
-  company      Company @relation(fields: [companyId], references: [id])
-  managerId    String?
-  manager      User?   @relation("UserManager", fields: [managerId], references: [id])
-  reports      User[]  @relation("UserManager")
+  id             String  @id @default(uuid())
+  email          String  @unique
+  passwordHash   String
+  firstName      String
+  secondName     String?
+  lastName       String
+  secondLastName String?
+  role           Role
+  isActive       Boolean @default(true)
+  companyId      String
+  company        Company @relation(fields: [companyId], references: [id])
+  managerId      String?
+  manager        User?   @relation("UserManager", fields: [managerId], references: [id])
+  reports        User[]  @relation("UserManager")
+
+  birthPlace      String?
+  identityNumber  String?
+  hiredDate       DateTime?
+  resignationDate DateTime?
+
+  title   String
+  section String
+  phoneNo String
+  address String
+
+  salary           Decimal @default(0) @db.Decimal(12, 2)
+  advanceAmount    Decimal @default(0) @db.Decimal(12, 2)
+  maxAdvanceAmount Decimal @default(0) @db.Decimal(12, 2)
+
+  imageUrl           String?
+  backgroundImageUrl String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -23,6 +23,19 @@ export async function listManagers(_req: Request, res: Response) {
   return res.json({ items: items.map(sanitize) });
 }
 
+export async function getManager(req: Request, res: Response) {
+  const id = (req.params?.id ?? "").toString().trim();
+  if (!id) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "id param is required" } });
+
+  const u = await users.findById(id);
+  if (!u) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Manager not found" } });
+  if (u.role !== "Manager") {
+    return res.status(404).json({ error: { code: "NOT_FOUND", message: "Manager not found" } });
+  }
+
+  return res.json(sanitize(u));
+}
+
 export async function updateManager(req: Request, res: Response) {
   const id = (req.params?.id ?? "").toString().trim();
   if (!id) return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "id param is required" } });

@@ -6,19 +6,39 @@ const prisma = new PrismaClient();
 
 
 async function main() {
-    const pwd = await hashPassword("Passw0rd!");
+    const pwd = await hashPassword("password");
+
+    const now = new Date();
+
+    const contractStartDate1 = new Date();
+    contractStartDate1.setFullYear(now.getFullYear() - 2);
+
+    const contractEndDate1 = new Date();
+    contractEndDate1.setFullYear(now.getFullYear() + 2);
+
+    const contractStartDate2 = new Date();
+    contractStartDate1.setFullYear(now.getFullYear() - 1);
+
+    const contractEndDate2 = new Date();
+    contractEndDate1.setFullYear(now.getFullYear() + 1);
 
     await prisma.company.upsert({
         where: { id: "30000000-0000-0000-0000-000000000001" },
-        update: { name: "Hr Management Company", isActive: true },
+        update: { name: "Bugbusters Hr Management Company", isActive: true },
         create: {
-        id: "30000000-0000-0000-0000-000000000001",
-        name: "Hr Management Company",
-        title: "Technology",
-        telephoneNumber: "+90 212 000 00 00",
-        address: "İstanbul",
-        email: "info@hrmanagementcompany.com",
-        isActive: true,
+            id: "30000000-0000-0000-0000-000000000001",
+            name: "Bugbusters Hr Management Company",
+            title: "Technology",
+            mersisNo: "1234567890123456",
+            taxNumber: "1234567890",
+            logo: "https://picsum.photos/seed/bugbusters/120",
+            telephoneNumber: "+90 212 000 00 00",
+            address: "İstanbul",
+            email: "info@bugbustershrmanagement.com",
+            foundationYear: new Date(2015, 0, 1),
+            contractStartDate: contractStartDate1,
+            contractEndDate: contractEndDate1,
+            isActive: true,
         },
     });
 
@@ -29,9 +49,15 @@ async function main() {
         id: "30000000-0000-0000-0000-000000000002",
         name: "Acme Corp",
         title: "Consulting",
+        mersisNo: "1234567899876543",
+        taxNumber: "0987654321",
+        logo: "https://picsum.photos/id/120/140",
         telephoneNumber: "+352 20 00 00",
         address: "Luxembourg",
         email: "contact@acme.example",
+        foundationYear: new Date(1990, 0, 1),
+        contractStartDate: contractStartDate2,
+        contractEndDate: contractEndDate2,
         isActive: true,
         },
     });
@@ -40,15 +66,27 @@ async function main() {
     const acmeId  = "30000000-0000-0000-0000-000000000002";
 
     await prisma.user.upsert({
-        where: { email: "admin@example.com" },
+        where: { email: "admin@bugbusters.com" },
         update: {},
         create: {
-            email: "admin@example.com",
+            email: "admin@bugbusters.com",
             passwordHash: pwd,
             firstName: "Ada",
             lastName: "Min",
             role: "Admin",
             companyId: hrCompanyId,
+            birthPlace: "Istanbul",
+            identityNumber: "11223344556",
+            hiredDate: new Date(2024, 10, 15),
+            title: "Hr Admin",
+            section: "Human Resources",
+            phoneNo: "05350000001",
+            address: "Ankara Cad. No:100",
+            salary: 3000,
+            imageUrl: "https://picsum.photos/seed/admin/200",
+            backgroundImageUrl: "https://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 20000,
         },
     });
 
@@ -62,6 +100,18 @@ async function main() {
             lastName: "Ger",
             role: "Manager",
             companyId: acmeId,
+            birthPlace: "Izmir",
+            identityNumber: "22334455667",
+            hiredDate: new Date(2023, 8, 12),
+            title: "Hr Manager",
+            section: "Hr",
+            phoneNo: "05350000002",
+            address: "Istanbul Cad. No:101",
+            salary: 5000,
+            imageUrl: "https://picsum.photos/seed/manager1/200",
+            backgroundImageUrl: "https://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 20000,
         },
     });
 
@@ -75,6 +125,18 @@ async function main() {
             lastName: "Ployee",
             role: "Employee",
             companyId: acmeId,
+            birthPlace: "Frankfurt",
+            identityNumber: "44556677889",
+            hiredDate: new Date(2025, 1, 12),
+            title: "Backend Developer",
+            section: "Ecommerce",
+            phoneNo: "05350000003",
+            address: "London Cad. No:102",
+            salary: 4500,
+            imageUrl: "https://picsum.photos/seed/manager2/200",
+            backgroundImageUrl: "https://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 30000,
         },
     });
 
@@ -88,6 +150,68 @@ async function main() {
             lastName: "Ployee",
             role: "Employee",
             companyId: acmeId,
+            birthPlace: "Madrid",
+            identityNumber: "11223344556",
+            hiredDate: new Date(2023, 12, 3),
+            title: "Frontend Developer",
+            section: "Mobile",
+            phoneNo: "05350000004",
+            address: "Barcelona Cad. No:104",
+            salary: 2500,
+            imageUrl: "https://picsum.photos/seed/employee1/200",
+            backgroundImageUrl: "https://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 10000,
+        },
+    });
+
+    await prisma.user.upsert({
+        where: { email: "employee.mark@example.com" },
+        update: {},
+        create: {
+            email: "employee.mark@example.com",
+            passwordHash: pwd,
+            firstName: "Mark",
+            lastName: "Close",
+            role: "Employee",
+            companyId: hrCompanyId,
+            birthPlace: "Bremen",
+            identityNumber: "44556677889",
+            hiredDate: new Date(2023, 1, 12),
+            title: "Senior Architect",
+            section: "Ecommerce",
+            phoneNo: "05350000003",
+            address: "Porto Cad. No:102",
+            salary: 14500,
+            imageUrl: "https://picsum.photos/seed/employee3/200",
+            backgroundImageUrl: "https://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 120000,
+        },
+    });
+
+    await prisma.user.upsert({
+        where: { email: "employee.anthony@example.com" },
+        update: {},
+        create: {
+            email: "employee.anthony@example.com",
+            passwordHash: pwd,
+            firstName: "Anthony",
+            lastName: "Bullet",
+            role: "Employee",
+            companyId: hrCompanyId,
+            birthPlace: "Van",
+            identityNumber: "001122334456",
+            hiredDate: new Date(2022, 7, 3),
+            title: "AWS Cloud Architect",
+            section: "Ecommerce",
+            phoneNo: "05350000006",
+            address: "Moskova Cad. No:104",
+            salary: 12500,
+            imageUrl: "https://picsum.photos/seed/employee2/200",
+            backgroundImageUrl: "hhttps://picsum.photos/1200/300",
+            advanceAmount: 0,
+            maxAdvanceAmount: 85000,
         },
     });
 
