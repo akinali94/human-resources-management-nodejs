@@ -111,3 +111,14 @@ export async function remove(req: Request, res: Response) {
   await repo.delete(id);
   res.status(204).send();
 }
+
+export async function myCompany(req: Request & { auth?: { userId: string } }, res: Response) {
+  if (!req.auth) return res.status(401).json({ error: { code: "UNAUTHORIZED", message: "No session" } });
+  // simple join: find user then company
+  // (istersen UserPrismaRepo ile tek adımda çekebiliriz)
+  const user = await (await import("../../../infra/db/prisma.client.js")).prisma.user.findUnique({
+    where: { id: req.auth.userId }, select: { company: true }
+  });
+  if (!user?.company) return res.status(404).json({ error: { code: "NOT_FOUND", message: "Company not found" } });
+  res.json(sanitize(user.company));
+}

@@ -26,9 +26,21 @@ export interface CreateUserInput { //For infra layer
   firstName: string;
   lastName: string;
   role: Role;
+  companyId: string;
   isActive?: boolean;
-  companyId?: string | null;
+  managerId?: string | null;
 }
+
+export type UpdateUserInput = {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: Role;
+  isActive?: boolean;
+  managerId?: string | null;
+  companyId?: string;
+};
+
 
 
 export function fullName(u: Pick<User, "firstName" | "lastName">): string {
