@@ -31,9 +31,7 @@ export default function ManagersList() {
     let ignore = false;
     (async () => {
       try {
-        // Prefer admin users endpoint. If your backend hasn't exposed it yet,
-        // temporarily point this to /api/employees?role=Manager
-        const data = await apiFetch<any>("/api/admin/users?role=Manager");
+        const data = await apiFetch<any>("/api/admin/managers");
         const list = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
         const mapped: Row[] = list.map((u: any) => ({
           id: u.id,

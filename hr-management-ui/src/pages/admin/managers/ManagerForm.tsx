@@ -65,11 +65,11 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
     let ignore = false;
     (async () => {
       try {
-        const list = await apiFetch<any[]>("/api/companies");
+        const list = await apiFetch<{ items: any[]}>("/api/companies");
         if (ignore) return;
-        const opts: CompanyOption[] = (Array.isArray(list) ? list : []).map((c: any) => ({
+        const opts: CompanyOption[] = (list.items ?? []).map((c: any) => ({
           id: String(c.id),
-          name: String(c.name ?? c.companyName ?? "Company"),
+          name: String(c.name),
           isActive: !!c.isActive,
         }));
         setCompanies(opts);
@@ -206,18 +206,6 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
               value={values.birthDate ?? ""}
               onChange={(e) => set("birthDate", e.currentTarget.value)}
             />
-          </div>
-
-          <div className="field">
-            <label>Gender</label>
-            <select
-              value={values.gender ?? ""}
-              onChange={(e) => set("gender", e.currentTarget.value as ManagerFormValues["gender"])}
-            >
-              <option value="">—</option>
-              <option value="Man">Man</option>
-              <option value="Woman">Woman</option>
-            </select>
           </div>
 
           <div className="field">

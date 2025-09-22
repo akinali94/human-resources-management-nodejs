@@ -14,7 +14,7 @@ export default function ManagerEdit() {
     let ignore = false;
     (async () => {
       try {
-        const u = await apiFetch<any>(`/api/admin/users/${id}`);
+        const u = await apiFetch<any>(`/api/admin/managers/${id}`);
         if (ignore) return;
         setInitial({
           firstName: u.firstName ?? "",
@@ -49,7 +49,7 @@ export default function ManagerEdit() {
   }, [id]);
 
   async function handleSubmit(values: ManagerFormValues) {
-    await apiFetch(`/api/admin/users/${id}`, {
+    await apiFetch(`/api/admin/managers/${id}`, {
       method: "PUT",
       body: JSON.stringify({
         firstName: values.firstName,
