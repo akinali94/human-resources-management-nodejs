@@ -1,44 +1,60 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../../../lib/api";
+import SearchInput from "../../../shared/SearchInput";
+import EmptyState from "../../../shared/EmptyState";
+import ConfirmDialog from "../../../shared/ConfirmDialog";
+import StatusBadge from "../../../shared/StatusBadge";
 
 type Row = {
   id: string;
   fullName: string;
   email: string;
-  phone?: string;
-  section?: string;
-  title?: string;
+  phone?: string | null;
+  section?: string | null;
+  title?: string | null;
+  isActive?: boolean;
 };
 
 export default function ManagersList() {
+  const nav = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+  // delete dialog state
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     let ignore = false;
     (async () => {
       try {
-        // Prefer the admin users endpoint; else fallback
+        // Prefer admin users endpoint. If your backend hasn't exposed it yet,
+        // temporarily point this to /api/employees?role=Manager
         const data = await apiFetch<any>("/api/admin/users?role=Manager");
-        const mapped: Row[] = (data.items ?? data ?? []).map((u: any) => ({
+        const list = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        const mapped: Row[] = list.map((u: any) => ({
           id: u.id,
           fullName: u.fullName ?? [u.firstName, u.lastName].filter(Boolean).join(" "),
           email: u.email,
-          phone: u.telephoneNumber ?? u.phone ?? "",
-          section: u.section ?? "",
-          title: u.title ?? "",
+          phone: u.telephoneNumber ?? u.phone ?? null,
+          section: u.section ?? null,
+          title: u.title ?? null,
+          isActive: typeof u.isActive === "boolean" ? u.isActive : true,
         }));
         if (!ignore) setRows(mapped);
       } catch (e: any) {
-        setErr(e?.message ?? "Failed to load managers.");
+        if (e?.message?.includes("401")) nav("/login", { replace: true });
+        else if (e?.message?.includes("403")) setErr("You don’t have permission to view managers.");
+        else setErr("Failed to load managers.");
       } finally {
         if (!ignore) setLoading(false);
       }
     })();
     return () => { ignore = true; };
-  }, []);
+  }, [nav]);
 
   const filtered = useMemo(() => {
     const k = q.trim().toLowerCase();
@@ -51,56 +67,85 @@ export default function ManagersList() {
     );
   }, [rows, q]);
 
-  if (loading) return <div className="container"><div className="skeleton">Loading…</div></div>;
-  if (err) return <div className="container"><div className="error">{err}</div></div>;
+  async function onConfirmDelete() {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      await apiFetch(`/api/admin/users/${deleteId}`, { method: "DELETE" });
+      setRows(prev => prev.filter(r => r.id !== deleteId));
+      setDeleteId(null);
+    } catch (e: any) {
+      // Typical: 409 if there are dependencies (team members, etc.)
+      alert(e?.message || "Delete failed.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  if (loading) return <div className="content"><div className="card">Loading…</div></div>;
+  if (err) return <div className="content"><div className="card error">{err}</div></div>;
 
   return (
-    <div className="container">
+    <div className="content">
       <div className="toolbar">
         <h2>Managers</h2>
         <div className="toolbar-right">
-          <input
-            className="search"
-            placeholder="Search name, email, section, title…"
-            value={q}
-            onChange={(e) => setQ(e.currentTarget.value)}
-          />
-          <a className="btn-primary" href="/admin/managers/new">New Manager</a>
+          <SearchInput placeholder="Search name, email, section, title…" value={q} onChange={setQ} />
+          <Link className="btn-primary" to="/admin/managers/new">New Manager</Link>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="empty">No managers found.</div>
+        <EmptyState
+          title="No managers found"
+          description="Try a different search or create a new manager."
+          action={<Link to="/admin/managers/new" className="btn-primary">Create manager</Link>}
+        />
       ) : (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Full name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Section</th>
-              <th>Title</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(r => (
-              <tr key={r.id}>
-                <td>{r.fullName || "—"}</td>
-                <td>{r.email || "—"}</td>
-                <td>{r.phone || "—"}</td>
-                <td>{r.section || "—"}</td>
-                <td>{r.title || "—"}</td>
-                <td className="row-actions">
-                  <a href={`/admin/managers/${r.id}`} className="btn-secondary">View</a>
-                  <a href={`/admin/managers/${r.id}/edit`} className="btn-secondary">Edit</a>
-                  {/* Delete button can open a confirm dialog → call DELETE */}
-                </td>
+        <div className="card">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Full name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Section</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th aria-label="actions" />
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.map(r => (
+                <tr key={r.id}>
+                  <td>{r.fullName || "—"}</td>
+                  <td>{r.email || "—"}</td>
+                  <td>{r.phone || "—"}</td>
+                  <td>{r.section || "—"}</td>
+                  <td>{r.title || "—"}</td>
+                  <td><StatusBadge active={r.isActive !== false} /></td>
+                  <td className="row-actions">
+                    <Link to={`/admin/managers/${r.id}`} className="btn-secondary">View</Link>
+                    <Link to={`/admin/managers/${r.id}/edit`} className="btn-secondary">Edit</Link>
+                    <button className="btn-secondary danger" onClick={() => setDeleteId(r.id)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
+
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Delete manager?"
+        description="This action cannot be undone."
+        confirmText={deleting ? "Deleting…" : "Delete"}
+        cancelText="Cancel"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={onConfirmDelete}
+        danger
+      />
     </div>
   );
 }
