@@ -6,32 +6,29 @@ export type ManagerFormValues = {
   firstName: string;
   secondName?: string;
   lastName: string;
-  secondSurname?: string;
+  secondLastName?: string;
   email: string;
   birthPlace?: string;
-  birthDate?: string; // YYYY-MM-DD
-  gender?: "Man" | "Woman";
-  nationalId?: string; // TC / national id
+  identityNumber?: string; // TC / national id
 
   // Company
-  companyId?: string;
-  title?: string;
-  section?: string;
+  companyId: string;
+  title: string;
+  section: string;
+  role: string;
   hiredDate?: string;        // YYYY-MM-DD
   resignationDate?: string;  // YYYY-MM-DD
-  salary?: number;
-  isActive?: boolean;
+  salary: number;
+  isActive: boolean;
 
   // Contact
-  phone?: string;
-  address?: string;
+  phoneNo: string;
+  address: string;
 
-  // Media (placeholder for future upload)
+  // Media
   imageUrl?: string | null;
   backgroundImageUrl?: string | null;
 
-  // Invite (create-only)
-  invite?: boolean;
 };
 
 export type CompanyOption = { id: string; name: string; isActive?: boolean };
@@ -48,6 +45,13 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
     firstName: "",
     lastName: "",
     email: "",
+    companyId: "",
+    title: "",
+    section: "",
+    role: "",
+    salary: 0,
+    phoneNo: "",
+    address: "",
     isActive: true,
     invite: true,
     ...initial,
@@ -87,7 +91,7 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
     setValues(prev => ({ ...prev, [key]: v }));
   }
 
-  // basic client-side validation (keep minimal; backend is source of truth)
+  // basic client-side validation
   const validation = useMemo(() => {
     const errs: Record<string, string> = {};
     if (!values.firstName?.trim()) errs.firstName = "First name is required.";
@@ -95,9 +99,15 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
     if (!values.email?.trim())     errs.email     = "Email is required.";
     else if (!/^\S+@\S+\.\S+$/.test(values.email)) errs.email = "Invalid email.";
     if (values.salary != null && Number.isNaN(Number(values.salary))) errs.salary = "Salary must be a number.";
+    if (values.salary == null) errs.salary = "Salary is required";
     if (values.resignationDate && values.hiredDate && values.resignationDate < values.hiredDate) {
       errs.resignationDate = "Resignation date must be after hired date.";
     }
+    if (!values.role?.trim()) errs.role = "Role is required.";
+    if (!values.title?.trim()) errs.title = "Title is required.";
+    if (!values.section?.trim()) errs.section = "Section is required.";
+    if (!values.phoneNo?.trim()) errs.phoneNo = "Phone Number is required.";
+    if (!values.address?.trim()) errs.address = "Address is required.";
     if (!values.companyId || values.companyId === "") {
       errs.companyId = "Company is required.";
     }
@@ -119,10 +129,6 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
     try {
       await onSubmit({
         ...values,
-        // normalize types
-        salary: values.salary != null && values.salary !== ("" as unknown as number)
-          ? Number(values.salary)
-          : undefined,
       });
     } catch (e: any) {
       const msg = e?.message ?? "Submit failed.";
@@ -174,8 +180,8 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
           <div className="field">
             <label>Second surname</label>
             <input
-              value={values.secondSurname ?? ""}
-              onChange={(e) => set("secondSurname", e.currentTarget.value)}
+              value={values.secondLastName ?? ""}
+              onChange={(e) => set("secondLastName", e.currentTarget.value)}
             />
           </div>
 
@@ -200,19 +206,10 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
           </div>
 
           <div className="field">
-            <label>Birth date</label>
-            <input
-              type="date"
-              value={values.birthDate ?? ""}
-              onChange={(e) => set("birthDate", e.currentTarget.value)}
-            />
-          </div>
-
-          <div className="field">
             <label>National ID</label>
             <input
-              value={values.nationalId ?? ""}
-              onChange={(e) => set("nationalId", e.currentTarget.value)}
+              value={values.identityNumber ?? ""}
+              onChange={(e) => set("identityNumber", e.currentTarget.value)}
             />
           </div>
         </div>
@@ -240,7 +237,23 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
           </div>
 
           <div className="field">
-            <label>Title</label>
+            <label>Role *</label>
+            <select
+              value={values.role ?? ""}
+              onChange={(e) => set("role", e.currentTarget.value as "Manager" | "Employee")}
+              aria-invalid={!!errors.role}
+            >
+              <option value="" disabled>Select role</option>
+              <option value="Manager">Manager</option>
+              <option value="Employee">Employee</option>
+            </select>
+            {errors.role && <div className="field-error">{errors.role}</div>}
+          </div>
+
+
+
+          <div className="field">
+            <label>Title *</label>
             <input
               value={values.title ?? ""}
               onChange={(e) => set("title", e.currentTarget.value)}
@@ -248,7 +261,7 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
           </div>
 
           <div className="field">
-            <label>Section</label>
+            <label>Section *</label>
             <input
               value={values.section ?? ""}
               onChange={(e) => set("section", e.currentTarget.value)}
@@ -275,40 +288,28 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
           </div>
 
           <div className="field">
-            <label>Salary</label>
-            <input
-              type="number"
-              inputMode="decimal"
-              value={values.salary ?? ("" as unknown as number)}
-              onChange={(e) => set("salary", (e.currentTarget.value as unknown) as number)}
-              aria-invalid={!!errors.salary}
-            />
+            <label>Salary *</label>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={Number.isFinite(values.salary) ? values.salary : ("" as unknown as number)}
+                onChange={(e) => set("salary", e.currentTarget.value === "" ? (NaN as unknown as number) : Number(e.currentTarget.value))}
+                aria-invalid={!!errors.salary}
+              />
             {errors.salary && <div className="field-error">{errors.salary}</div>}
           </div>
 
-          <div className="field checkbox">
+          <div className="field">
             <label>
               <input
                 type="checkbox"
-                checked={values.isActive ?? true}
+                checked={values.isActive}
                 onChange={(e) => set("isActive", e.currentTarget.checked)}
               />
-              Active
+              Is Active *
             </label>
           </div>
 
-          {"invite" in values && (
-            <div className="field checkbox">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={values.invite ?? false}
-                  onChange={(e) => set("invite", e.currentTarget.checked)}
-                />
-                Send invitation email
-              </label>
-            </div>
-          )}
         </div>
       </section>
 
@@ -317,17 +318,17 @@ export default function ManagerForm({ initial, submitLabel, onSubmit }: Props) {
         <h3>Contact</h3>
         <div className="form-grid">
           <div className="field">
-            <label>Phone</label>
+            <label>Phone *</label>
             <input
-              value={values.phone ?? ""}
-              onChange={(e) => set("phone", e.currentTarget.value)}
+              value={values.phoneNo ?? ""}
+              onChange={(e) => set("phoneNo", e.currentTarget.value)}
               placeholder="+90 5xx xxx xx xx"
               autoComplete="tel"
             />
           </div>
 
           <div className="field col-2">
-            <label>Address</label>
+            <label>Address *</label>
             <textarea
               rows={3}
               value={values.address ?? ""}

@@ -2,6 +2,10 @@ import { z } from "zod";
 
 const DateNullableOpt = z.union([z.coerce.date(), z.date()]).nullable().optional();
 const UrlNullableOpt = z.string().url().nullable().optional();
+const NullableStringOpt = z.preprocess(
+  v => (v === "" ? null : v),
+  z.string().trim().min(1).nullable().optional()
+);
 
 
 export const CreateManagerBodySchema = z.object({
@@ -38,13 +42,32 @@ export const CreateManagerBodySchema = z.object({
 export type CreateManagerBody = z.infer<typeof CreateManagerBodySchema>;
 
 
-export const UpdateManagerBody = z.object({
-  email: z.string().email().optional(),
-  firstName: z.string().min(1).optional(),
-  lastName: z.string().min(1).optional(),
-  isActive: z.boolean().optional(),
-  managerId: z.string().uuid().nullish(), // null → kaldır
-  companyId: z.string().uuid().optional(),
-  role: z.literal("Manager").optional(),  // manager rolünü koru (opsiyonel)
+
+export const UpdateManagerBodySchema = z.object({
+  //required
+  firstName: z.string().min(2).max(100),
+  lastName: z.string().min(2).max(100),
+  email: z.string().email(),
+  companyId: z.string().uuid(),
+  title: z.string().min(2).max(100),
+  section: z.string().min(2).max(100),
+  phoneNo: z.string().min(1),
+  address: z.string().min(1),
+  isActive: z.boolean(),
+  salary: z.coerce.number().min(0),
+
+  role: z.string().min(1),
+
+  //nullable
+  secondName: NullableStringOpt,
+  secondLastName: NullableStringOpt,
+  birthPlace: NullableStringOpt,
+  nationalId: NullableStringOpt,
+
+  hiredDate: DateNullableOpt,
+  resignationDate: DateNullableOpt,
+
+  imageUrl: UrlNullableOpt,
+  backgroundImageUrl: UrlNullableOpt,
 });
-export type UpdateManagerBody = z.infer<typeof UpdateManagerBody>;
+export type UpdateManagerBody = z.infer<typeof UpdateManagerBodySchema>;

@@ -47,7 +47,7 @@ export type CreateUserInput = {
   section: string;
   phoneNo: string;
   address: string;
-  
+
   salary: number;
   advanceAmount: number;
   maxAdvanceAmount: number;
@@ -71,11 +71,12 @@ export type CreateUserInput = {
 
 export type UpdateUserInput = {
   // scalar edits
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  role?: Role;
-  isActive?: boolean;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: Role;
+  isActive: boolean;
+  companyId: string; 
 
   secondName?: string | null;
   secondLastName?: string | null;
@@ -83,19 +84,18 @@ export type UpdateUserInput = {
   identityNumber?: string | null;   
   hiredDate?: Date | null;
   resignationDate?: Date | null;
-  title?: string | null;
-  section?: string | null;
-  phoneNo?: string | null;
-  address?: string | null;
+  title: string;
+  section: string;
+  phoneNo: string;
+  address: string;
 
   // money (not nullable in DB; set numbers only)
   salary?: number;
-  advanceAmount?: number;
   maxAdvanceAmount?: number;
 
-  // relations
-  managerId?: string | null;  // null → remove manager
-  companyId?: string;         // required column; allow change, not null
+  imageUrl?: string | null;
+  backgroundImageUrl?: string | null;
+
 };
 
 

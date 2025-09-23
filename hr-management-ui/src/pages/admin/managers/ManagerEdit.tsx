@@ -17,27 +17,25 @@ export default function ManagerEdit() {
         const u = await apiFetch<any>(`/api/admin/managers/${id}`);
         if (ignore) return;
         setInitial({
+          email: u.email ?? "",
           firstName: u.firstName ?? "",
           secondName: u.secondName ?? "",
           lastName: u.lastName ?? u.surname ?? "",
-          secondSurname: u.secondSurname ?? "",
-          email: u.email ?? "",
-          phone: u.telephoneNumber ?? u.phone ?? "",
+          secondLastName: u.secondLastName ?? "",
+          phoneNo: u.phoneNo ?? "",
           address: u.address ?? "",
           birthPlace: u.birthPlace ?? "",
-          birthDate: u.birthDate ?? "",
-          gender: u.gender ?? "",
-          nationalId: u.nationalId ?? u.tc ?? "",
+          identityNumber: u.identityNumber ?? u.tc ?? "",
           companyId: u.companyId ?? "",
+          role: (u.role === "Manager" || u.role === "Employee") ? u.role : "",
           title: u.title ?? "",
           section: u.section ?? "",
-          hiredDate: u.hiredDate ?? u.startedDate ?? "",
-          resignationDate: u.resignationDate ?? "",
+          hiredDate: u.hiredDate ? new Date(u.hiredDate).toISOString().slice(0,10) : "",
+          resignationDate: u.resignationDate ? new Date(u.resignationDate).toISOString().slice(0,10) : "",
           salary: typeof u.salary === "number" ? u.salary : (u.salary ? Number(u.salary) : undefined),
           imageUrl: u.imageUrl ?? null,
           backgroundImageUrl: u.backgroundImageUrl ?? null,
           isActive: typeof u.isActive === "boolean" ? u.isActive : true,
-          // no invite in edit
         });
       } catch (e: any) {
         setErr(e?.message ?? "Failed to load manager.");
@@ -48,6 +46,14 @@ export default function ManagerEdit() {
     return () => { ignore = true; };
   }, [id]);
 
+  function dateToISO(dateStr?: string | null) {
+    if (!dateStr) return undefined;                 // boşsa hiç gönderme
+    const d = new Date(dateStr);                    // "YYYY-MM-DD" kabul edilir
+    if (isNaN(d.getTime())) return undefined;
+    return d.toISOString();                         // RFC3339
+  }
+
+
   async function handleSubmit(values: ManagerFormValues) {
     await apiFetch(`/api/admin/managers/${id}`, {
       method: "PUT",
@@ -55,19 +61,18 @@ export default function ManagerEdit() {
         firstName: values.firstName,
         secondName: values.secondName,
         lastName: values.lastName,
-        secondSurname: values.secondSurname,
+        secondLastName: values.secondLastName,
         email: values.email,
-        phone: values.phone,
+        phoneNo: values.phoneNo,
+        role: values.role,
         address: values.address,
         birthPlace: values.birthPlace,
-        birthDate: values.birthDate,
-        gender: values.gender,
-        nationalId: values.nationalId,
+        identityNumber: values.identityNumber,
         companyId: values.companyId,
         title: values.title,
         section: values.section,
-        hiredDate: values.hiredDate,
-        resignationDate: values.resignationDate,
+        hiredDate: dateToISO(values.hiredDate),
+        resignationDate: dateToISO(values.resignationDate),
         salary: values.salary,
         imageUrl: values.imageUrl,
         backgroundImageUrl: values.backgroundImageUrl,

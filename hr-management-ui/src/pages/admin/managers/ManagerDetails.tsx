@@ -4,38 +4,81 @@ import { apiFetch } from "../../../lib/api";
 import ConfirmDialog from "../../../shared/ConfirmDialog";
 import StatusBadge from "../../../shared/StatusBadge";
 
-type Detail = {
-  id: string;
-  imageUrl?: string | null;
-  fullName: string;
-  title?: string | null;
-
-  // Personal
-  birthDate?: string | null;     // ISO or YYYY-MM-DD
+export type ManagerApiResponse = {
+  id: string;                                      // uuid
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: "Manager" | "Employee" | string;          
+  secondName?: string | null;
+  secondLastName?: string | null;
   birthPlace?: string | null;
-  nationalId?: string | null;    // TC / national id
-
-  // Company
-  isActive?: boolean;
-  companyName?: string | null;
-  section?: string | null;
-  hiredDate?: string | null;
-
-  // Contact
-  telephoneNumber?: string | null;
-  email?: string | null;
-  address?: string | null;
+  identityNumber?: string | null;
+  hiredDate?: string | null;                        // ISO datetime
+  resignationDate?: string | null;                  // ISO datetime
+  title: string;
+  section: string;
+  phoneNo: string;
+  address: string;
+  isActive: boolean;
+  companyId: string;
+  companyName: string;                               
+  salary: string | number;                         
+  advanceAmount: string;                           
+  maxAdvanceAmount: string;                        
+  imageUrl?: string | null;
+  backgroundImageUrl?: string | null;
+  createdAt: string;                               // ISO
+  updatedAt: string;                               // ISO
 };
 
-function formatDateDDMMYYYY(value?: string | null) {
-  if (!value) return "—";
-  // Accepts ISO or YYYY-MM-DD
+
+export type Detail = {
+  id: string;
+
+  // Personal
+  fullName: string;
+  firstName: string;
+  secondName?: string;
+  lastName: string;
+  secondLastName?: string;
+  email: string;
+  birthPlace?: string;
+  identityNumber?: string;
+
+  // Company
+  companyName: string;
+  title: string;
+  section: string;
+  role: "Manager" | "Employee" | "";
+  hiredDate?: string;                  // YYYY-MM-DD
+  resignationDate?: string;            // YYYY-MM-DD
+  salary: number;
+  isActive: boolean;
+  advanceAmount: string;
+  maxAdvanceAmount: string;
+
+  // Contact
+  phoneNo: string;
+  address: string;
+
+  // Media
+  imageUrl?: string | null;
+  backgroundImageUrl?: string | null;
+
+  createdAt: string;                   // ISO olarak tutmak genelde daha iyi
+  updatedAt: string;                   // ISO
+};
+function isoToDateInput(value?: string | null): string | undefined {
+  if (!value) return undefined;
   const d = new Date(value);
-  if (isNaN(d.getTime())) return "—";
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}.${mm}.${yyyy}`;
+  if (isNaN(d.getTime())) return undefined;
+  return d.toISOString().slice(0, 10);
+}
+
+function toNumber(n: string | number): number {
+  const v = typeof n === "number" ? n : Number(n);
+  return Number.isFinite(v) ? v : 0;
 }
 
 function Avatar({ src, alt }: { src?: string | null; alt: string }) {
@@ -61,33 +104,45 @@ export default function ManagerDetails() {
     let ignore = false;
     (async () => {
       try {
-        const u = await apiFetch<any>(`/api/admin/managers/${id}`);
+        const u = await apiFetch<ManagerApiResponse>(`/api/admin/managers/${id}`);
 
         if (ignore) return;
-        const fullName =
-          u.fullName ??
-          [u.firstName, u.secondName, u.lastName, u.secondSurname]
+        const fullName = [u.firstName, u.secondName, u.lastName, u.secondLastName]
             .filter(Boolean)
             .join(" ");
 
         setDetail({
-          id: u.id,
-          imageUrl: u.imageUrl ?? null,
-          fullName: fullName || "—",
-          title: u.title ?? null,
+            id: u.id,
+            fullName: fullName,
+            firstName: u.firstName,
+            secondName: u.secondName ?? undefined,
+            lastName: u.lastName,
+            secondLastName: u.secondLastName ?? undefined,
+            email: u.email,
+            birthPlace: u.birthPlace ?? undefined,
+            identityNumber: u.identityNumber ?? undefined,
 
-          birthDate: u.birthDate ?? u.birthdate ?? null,
-          birthPlace: u.birthPlace ?? u.placeOfBirth ?? null,
-          nationalId: u.tc ?? u.nationalId ?? null,
+            companyName: u.companyName,
+            title: u.title,
+            section: u.section,
+            role: u.role === "Manager" || u.role === "Employee" ? u.role : "",
 
-          isActive: typeof u.isActive === "boolean" ? u.isActive : true,
-          companyName: u.companyName ?? u.company?.name ?? null,
-          section: u.section ?? null,
-          hiredDate: u.hiredDate ?? u.startedDate ?? null,
+            hiredDate: isoToDateInput(u.hiredDate),
+            resignationDate: isoToDateInput(u.resignationDate),
 
-          telephoneNumber: u.telephoneNumber ?? u.phone ?? null,
-          email: u.email ?? null,
-          address: u.address ?? null,
+            salary: toNumber(u.salary),
+            isActive: u.isActive,
+            advanceAmount: u.advanceAmount,
+            maxAdvanceAmount: u.maxAdvanceAmount,
+
+            phoneNo: u.phoneNo,
+            address: u.address,
+
+            imageUrl: u.imageUrl ?? null,
+            backgroundImageUrl: u.backgroundImageUrl ?? null,
+
+            createdAt: u.createdAt,
+            updatedAt: u.updatedAt,
         });
       } catch (e: any) {
         if (e?.message?.includes("401")) nav("/login", { replace: true });
@@ -101,14 +156,12 @@ export default function ManagerDetails() {
     return () => { ignore = true; };
   }, [id, nav]);
 
-  const hiredDate = useMemo(() => formatDateDDMMYYYY(detail?.hiredDate), [detail]);
-  const birthDate = useMemo(() => formatDateDDMMYYYY(detail?.birthDate), [detail]);
+  const hiredDate = useMemo(() => isoToDateInput(detail?.hiredDate), [detail]);
 
   async function handleDelete() {
     if (!id) return;
     setDeleting(true);
     try {
-      // If your backend uses /api/admin/users/:id instead, change the URL here:
       await apiFetch(`/api/admin/managers/${id}`, { method: "DELETE" });
       nav("/admin/managers", { replace: true });
     } catch (e: any) {
@@ -144,10 +197,9 @@ export default function ManagerDetails() {
           <div className="profile-col">
             <ul>
               <li><strong>Full name:</strong> {detail.fullName || "—"}</li>
-              <li><strong>Birth date:</strong> {birthDate}</li>
               <li><strong>Place of birth:</strong> {detail.birthPlace || "—"}</li>
               <li><strong>Nationality:</strong> World</li>
-              <li><strong>Identity:</strong> {detail.nationalId || "—"}</li>
+              <li><strong>Identity:</strong> {detail.identityNumber || "—"}</li>
             </ul>
           </div>
 
@@ -165,7 +217,7 @@ export default function ManagerDetails() {
           {/* Column 3 — Contact */}
           <div className="profile-col">
             <ul>
-              <li><strong>Mobile:</strong> {detail.telephoneNumber || "—"}</li>
+              <li><strong>Mobile:</strong> {detail.phoneNo || "—"}</li>
               <li><strong>Email:</strong> {detail.email || "—"}</li>
               <li><strong>Address:</strong> {detail.address || "—"}</li>
             </ul>

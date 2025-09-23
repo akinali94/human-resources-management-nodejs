@@ -1,6 +1,19 @@
-import type { CreateManagerBody } from "../dtos/admin.dto.js";
-import { Roles, type Role, type CreateUserInput } from "../../../domain/user/user.entity.js";
+import type { CreateManagerBody, UpdateManagerBody } from "../dtos/admin.dto.js";
+import { Roles, type Role, type CreateUserInput, type UpdateUserInput } from "../../../domain/user/user.entity.js";
 
+
+function getRoleFromString(roleStr: string): Role {
+  switch (roleStr.toLowerCase()) {
+    case "manager":
+      return Roles.Manager;
+    case "admin":
+      return Roles.Admin;
+    case "employee":
+      return Roles.Employee;
+    default:
+      throw new Error(`Invalid role string: ${roleStr}`);
+  }
+}
 
 export function toCreateUserInputFromManagerBody(params: {
   body: CreateManagerBody;
@@ -45,15 +58,40 @@ export function toCreateUserInputFromManagerBody(params: {
   };
 }
 
-function getRoleFromString(roleStr: string): Role {
-  switch (roleStr.toLowerCase()) {
-    case "manager":
-      return Roles.Manager;
-    case "admin":
-      return Roles.Admin;
-    case "employee":
-      return Roles.Employee;
-    default:
-      throw new Error(`Invalid role string: ${roleStr}`);
+export function toUpdateUserInputFromManagerBody(body: UpdateManagerBody): UpdateUserInput {
+
+  const getRole = getRoleFromString(body.role)
+  
+  return {
+    //required
+    email: body.email,
+    firstName: body.firstName,
+    lastName: body.lastName,
+    isActive: body.isActive,
+    companyId: body.companyId,
+    title: body.title,
+    section: body.section,
+    phoneNo: body.phoneNo,
+    address: body.address,
+
+    salary: body.salary,
+    maxAdvanceAmount: body.salary*2/3,
+    
+    role: getRole,
+
+    //nullable
+    secondName: body.secondName ?? null,
+    secondLastName: body.secondLastName ?? null,
+    birthPlace: body.birthPlace ?? null,
+    identityNumber: body.nationalId ?? null,
+
+    hiredDate: body.hiredDate ?? null,
+    resignationDate: body.resignationDate ?? null,
+
+    imageUrl: body.imageUrl ?? null,
+    backgroundImageUrl: body.backgroundImageUrl ?? null,
+
   }
+
 }
+

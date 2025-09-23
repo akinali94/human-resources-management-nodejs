@@ -1,7 +1,8 @@
 import type { UserRepo } from "../../domain/user/user.repo.ts";
 import type { CreateUserInput, UpdateUserInput, Role, User } from "../../domain/user/user.entity.ts";
 import { prisma } from "../db/prisma.client.js"
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { mapUser } from "./mappers/user.mapper.repo.js";
 
 const numOrUndef = (v: number | undefined) => (typeof v === "number" ? v : undefined);
 
@@ -45,54 +46,96 @@ export class UserPrismaRepo implements UserRepo {
         };
 
         const row = await prisma.user.create({ data });
-        return row as unknown as User;
+
+        const mappedUser = mapUser(row)
+
+        return mappedUser as unknown as User;
     }
 
     async update(id: string, input: UpdateUserInput): Promise<User> {
+
         const data: Prisma.UserUpdateInput = {
-        // primitives
-        email: input.email ?? undefined,
-        firstName: input.firstName ?? undefined,
-        lastName: input.lastName ?? undefined,
-        role: input.role ?? undefined,
-        isActive: input.isActive ?? undefined,
-        title: input.title === undefined ? undefined : input.title,
-        section: input.section === undefined ? undefined : input.section,
-        phoneNo: input.phoneNo === undefined ? undefined : input.phoneNo,
-        address: input.address === undefined ? undefined : input.address,
+            // required
+            email: input.email,
+            firstName: input.firstName,
+            lastName: input.lastName,
+            role: input.role,
+            title: input.title,
+            section: input.section,
+            phoneNo: input.phoneNo,
+            address: input.address,
+        }
+
+        if("isActive" in input) {
+            data.isActive = input.isActive!;
+        }
+
+        // Nullable texts
+        if ("secondName" in input) {
+            data.secondName = input.secondName; // string | null
+        }
+        if ("secondLastName" in input) {
+            data.secondLastName = input.secondLastName;
+        }
+        if ("birthPlace" in input) {
+            data.birthPlace = input.birthPlace;
+        }
+        if ("identityNumber" in input) {
+            data.identityNumber = input.identityNumber;
+        }
 
 
-        // nullable strings (explicit null clears)
-        secondName: input.secondName === undefined ? undefined : input.secondName,
-        secondLastName: input.secondLastName === undefined ? undefined : input.secondLastName,
-        birthPlace: input.birthPlace === undefined ? undefined : input.birthPlace,
-        identityNumber: input.identityNumber === undefined ? undefined : input.identityNumber,
-        hiredDate: input.hiredDate === undefined ? undefined : input.hiredDate,
-        resignationDate: input.resignationDate === undefined ? undefined : input.resignationDate,
+        if ("hiredDate" in input) {
+            data.hiredDate = input.hiredDate;
+        }
+        if ("resignationDate" in input) {
+            data.resignationDate = input.resignationDate;
+        }
 
-        // decimals (not nullable)
-        salary: input.salary === undefined ? undefined : input.salary,
-        advanceAmount: input.advanceAmount === undefined ? undefined : input.advanceAmount,
-        maxAdvanceAmount: input.maxAdvanceAmount === undefined ? undefined : input.maxAdvanceAmount,
-        };
+
+        if ("imageUrl" in input) {
+            data.imageUrl = input.imageUrl;
+        }
+        if ("backgroundImageUrl" in input) {
+            data.backgroundImageUrl = input.backgroundImageUrl;
+        }
+
+
+        if ("salary" in input) {
+            data.salary = input.salary!;
+        }
+        if ("maxAdvanceAmount" in input) {
+            data.maxAdvanceAmount = input.maxAdvanceAmount!;
+        }
+
+        // relations — company
+        if (input.companyId) {
+            data.company = { connect: { id: input.companyId } };
+        }
 
         // relations
         if (input.companyId !== undefined) {
         (data.company = { connect: { id: input.companyId } });
         }
-        if (input.managerId !== undefined) {
-        data.manager = input.managerId
-            ? { connect: { id: input.managerId } }
-            : { disconnect: true };
-        }
 
         const row = await prisma.user.update({ where: { id }, data });
-        return row as unknown as User;
+
+        const mappedUser = mapUser(row)
+
+        return mappedUser;
+    }
+
+    async delete(id: string): Promise<User> {
+        const row = await prisma.user.delete({where: { id }});
+        const mappedUser = mapUser(row);
+        return mappedUser;
     }
 
 
     async updateName(id: string, firstName: string, lastName: string): Promise<User> {
-        return prisma.user.update({ where: { id }, data: { firstName, lastName } }) as any;
+        const row = prisma.user.update({ where: { id }, data: { firstName, lastName } }) as any;
+        const mappedUser = mapUser(row);
+        return mappedUser;
     }
 
     async setRole(id: string, role: Role): Promise<void> {
@@ -108,6 +151,6 @@ export class UserPrismaRepo implements UserRepo {
             where: { role: "Manager" },
             orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
         });
-        return rows as User[];
+        return rows.map(mapUser)
     }
 }

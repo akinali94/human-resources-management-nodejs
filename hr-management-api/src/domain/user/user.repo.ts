@@ -10,6 +10,8 @@ export interface UserRepo {
 
   update(id: string, input: UpdateUserInput): Promise<User>;
 
+  delete(id: string): Promise<User>;
+
   updateName(id: string, firstName: string, lastName: string): Promise<User>;
 
   setRole(id: string, role: Role): Promise<void>;

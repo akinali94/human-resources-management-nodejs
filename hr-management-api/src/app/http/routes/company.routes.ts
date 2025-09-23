@@ -5,12 +5,12 @@ import { list, create, detail, update, remove, myCompany } from "../controllers/
 
 const r = Router();
 
-// Everyone logged-in can list & view
-r.get("/", requireAuth, list);
+
 r.get("/me", requireAuth, myCompany);
-r.get("/:id", requireAuth, detail);
 
 // Admin-only mutations
+r.get("/", requireAuth, requireRole("Admin"), list);
+r.get("/:id", requireAuth,requireRole("Admin"), detail);
 r.post("/", requireAuth, requireRole("Admin"), create);
 r.put("/:id", requireAuth, requireRole("Admin"), update);
 r.delete("/:id", requireAuth, requireRole("Admin"), remove);

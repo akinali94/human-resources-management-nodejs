@@ -6,21 +6,18 @@ export default function ManagerCreate() {
   const nav = useNavigate();
 
   async function handleSubmit(values: ManagerFormValues) {
-    // Server should set role = "Manager", UI does not send it
-    await apiFetch("/api/admin/users", {
+    await apiFetch("/api/admin/managers", {
       method: "POST",
       body: JSON.stringify({
         firstName: values.firstName,
         secondName: values.secondName,
         lastName: values.lastName,
-        secondSurname: values.secondSurname,
+        secondLastName: values.secondLastName,
         email: values.email,
-        phone: values.phone,
+        phoneNo: values.phoneNo,
         address: values.address,
         birthPlace: values.birthPlace,
-        birthDate: values.birthDate,
-        gender: values.gender,
-        nationalId: values.nationalId,
+        nationalId: values.identityNumber,
         companyId: values.companyId,
         title: values.title,
         section: values.section,
@@ -29,8 +26,6 @@ export default function ManagerCreate() {
         salary: values.salary,
         imageUrl: values.imageUrl,
         backgroundImageUrl: values.backgroundImageUrl,
-        isActive: values.isActive,
-        invite: values.invite ?? true,
       }),
     });
 

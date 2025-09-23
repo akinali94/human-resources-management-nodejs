@@ -19,7 +19,7 @@ function App() {
         <Route path="managers/new" element={<ManagerCreate />} />
         <Route path="managers/:id" element={<ManagerDetails />} />
         <Route path="managers/:id/edit" element={<ManagerEdit />} />
-        {/* <Route path="companies" element={<CompaniesList />} /> */}
+        {/*<Route path="companies" element={<CompaniesList />} />*/}
         {/* <Route path="companies/new" element={<CompanyCreate />} /> */}
       </Route>
 

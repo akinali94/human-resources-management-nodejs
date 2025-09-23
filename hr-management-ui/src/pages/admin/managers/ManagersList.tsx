@@ -69,7 +69,7 @@ export default function ManagersList() {
     if (!deleteId) return;
     setDeleting(true);
     try {
-      await apiFetch(`/api/admin/users/${deleteId}`, { method: "DELETE" });
+      await apiFetch(`/api/admin/managers/${deleteId}`, { method: "DELETE" });
       setRows(prev => prev.filter(r => r.id !== deleteId));
       setDeleteId(null);
     } catch (e: any) {

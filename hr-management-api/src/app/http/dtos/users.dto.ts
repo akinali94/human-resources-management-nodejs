@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "../../../domain/user/user.entity.js";
 
 const dateStr = z
   .string()
@@ -67,3 +68,71 @@ export const UpdateUserBody = z.object({
   companyId: z.string().uuid().optional(),
 });
 export type UpdateUserBody = z.infer<typeof UpdateUserBody>;
+
+
+export function UserPublicDto(u: User) {
+  return {
+    id: u.id,
+    email: u.email,
+    firstName: u.firstName,
+    lastName: u.lastName,
+    role: u.role,
+    secondName: u.secondName ?? null,
+    secondLastName: u.secondLastName ?? null,
+    birthPlace: u.birthPlace ?? null,
+    identityNumber: u.identityNumber ?? null,
+    hiredDate: u.hiredDate ?? null,
+    resignationDate: u.resignationDate ?? null,
+    title: u.title,
+    section: u.section,
+    phoneNo: u.phoneNo,
+    address: u.address,
+    isActive: u.isActive,
+    companyId: u.companyId,
+    companyName: "",
+    salary: u.salary,
+    advanceAmount: u.advanceAmount,
+    maxAdvanceAmount: u.maxAdvanceAmount,
+    imageUrl: u.imageUrl,
+    backgroundImageUrl: u.backgroundImageUrl,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt,
+  };
+}
+
+/*
+export const UserPublicDto = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  firstName: z.string(),
+  secondName: z.string().nullable(),
+  lastName: z.string(),
+  secondLastName: z.string().nullable(),
+  role: z.enum(["Employee","Manager","Admin"]),
+  birthPlace: z.string().nullable(),
+  identityNumber: z.string().nullable(),
+  hiredDate: z.date().nullable(),
+  resignationDate: z.date().nullable(),
+  title: z.string(),
+  section: z.string(),
+  phoneNo: z.string(),
+  address: z.string(),
+  isActive: z.boolean(),
+  companyId: z.string().uuid(),
+  salary: z.number(),
+  advanceAmount: z.number(),
+  maxAdvanceAmount: z.number(),
+  imageUrl: z.string().url().nullable(),
+  backgroundImageUrl: z.string().url().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type UserPublic = z.infer<typeof UserPublicDto>;
+
+// tek noktadan çevirici
+export function toUserPublic(u: any): UserPublic {
+  // repo zaten Decimal→number yaptı; burada sadece şekli garantiliyoruz
+  return UserPublicDto.parse(u);
+}
+  */
