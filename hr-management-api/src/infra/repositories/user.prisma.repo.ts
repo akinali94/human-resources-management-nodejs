@@ -28,17 +28,17 @@ export class UserPrismaRepo implements UserRepo {
         address: input.address,
         isActive: input.isActive ?? true,
 
-        secondName: input.secondName ?? undefined,
-        secondLastName: input.secondLastName ?? undefined,
-        birthPlace: input.birthPlace ?? undefined,
-        identityNumber: input.identityNumber ?? undefined,
-        hiredDate: input.hiredDate ?? undefined,
-        resignationDate: input.resignationDate ?? undefined,
+        secondName: input.secondName ?? null,
+        secondLastName: input.secondLastName ?? null,
+        birthPlace: input.birthPlace ?? null,
+        identityNumber: input.identityNumber ?? null,
+        hiredDate: input.hiredDate ?? null,
+        resignationDate: input.resignationDate ?? null,
 
 
-        salary: numOrUndef(input.salary),
-        advanceAmount: numOrUndef(input.advanceAmount),
-        maxAdvanceAmount: numOrUndef(input.maxAdvanceAmount),
+        salary: input.salary,
+        advanceAmount: input.advanceAmount,
+        maxAdvanceAmount: input.maxAdvanceAmount,
 
         company: { connect: { id: input.companyId } },
         ...(input.managerId ? { manager: { connect: { id: input.managerId } } } : {}),

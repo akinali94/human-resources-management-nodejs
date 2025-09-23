@@ -47,6 +47,10 @@ export type CreateUserInput = {
   section: string;
   phoneNo: string;
   address: string;
+  
+  salary: number;
+  advanceAmount: number;
+  maxAdvanceAmount: number;
 
   // optional/nullable extras
   secondName?: string | null;
@@ -60,10 +64,6 @@ export type CreateUserInput = {
 
   isActive?: boolean;
 
-  // money – optional; DB defaults to 0 if omitted
-  salary?: number;
-  advanceAmount?: number;
-  maxAdvanceAmount?: number;
 
   // relations
   managerId?: string | null;
