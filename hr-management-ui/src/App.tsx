@@ -5,8 +5,10 @@ import ManagersList from "./pages/admin/managers/ManagersList";
 import ManagerDetails from "./pages/admin/managers/ManagerDetails";
 import ManagerCreate from "./pages/admin/managers/ManagerCreate";
 import ManagerEdit from "./pages/admin/managers/ManagerEdit";
+import CompaniesList from "./pages/admin/companies/CompaniesList";
 import Home from "./pages/Home";
 import './App.css'
+import CompanyDetails from "./pages/admin/companies/CompanyDetails";
 
 function App() {
 
@@ -19,7 +21,8 @@ function App() {
         <Route path="managers/new" element={<ManagerCreate />} />
         <Route path="managers/:id" element={<ManagerDetails />} />
         <Route path="managers/:id/edit" element={<ManagerEdit />} />
-        {/*<Route path="companies" element={<CompaniesList />} />*/}
+        <Route path="companies" element={<CompaniesList />} />
+        <Route path="companies/:id" element={<CompanyDetails />} />
         {/* <Route path="companies/new" element={<CompanyCreate />} /> */}
       </Route>
 
