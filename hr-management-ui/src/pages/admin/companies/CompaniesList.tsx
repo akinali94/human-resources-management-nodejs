@@ -91,7 +91,7 @@ export default function CompaniesList() {
         <h2>Companies</h2>
         <div className="toolbar-right">
           <SearchInput placeholder="Search name, email, section, title…" value={q} onChange={setQ} />
-          <Link className="btn-primary" to="/companies/new">New Company</Link>
+          <Link className="btn-primary" to="/admin/companies/new">New Company</Link>
         </div>
       </div>
 

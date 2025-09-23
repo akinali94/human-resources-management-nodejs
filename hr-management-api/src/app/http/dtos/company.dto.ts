@@ -7,7 +7,7 @@ export const CreateCompanyBody = z.object({
   title: z.string().max(100).nullish(),
   mersisNo: z.string().max(50).nullish(),
   taxNumber: z.string().max(50).nullish(),
-  logo: z.string().url().nullish(),
+  logo: z.string().url({ message: "Invalid URL" }).or(z.literal("")) .optional(),
   telephoneNumber: z.string().max(50).nullish(),
   address: z.string().max(300).nullish(),
   email: z.string().email().nullish(),

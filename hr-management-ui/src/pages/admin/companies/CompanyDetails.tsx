@@ -100,7 +100,7 @@ export default function CompanyDetails() {
     setDeleting(true);
     try {
       await apiFetch(`/api/companies/${id}`, { method: "DELETE" });
-      nav("/companies", { replace: true });
+      nav("/admin/companies", { replace: true });
     } catch (e: any) {
       alert(e?.message || "Delete failed.");
       setDeleting(false);
@@ -169,9 +169,9 @@ export default function CompanyDetails() {
 
         <hr />
         <div className="actions">
-          <Link className="btn-secondary" to={`/companies/${detail.id}/edit`}>Update info</Link>
+          <Link className="btn-secondary" to={`/admin/companies/${detail.id}/edit`}>Update info</Link>
           <button className="btn-secondary danger" onClick={() => setConfirmOpen(true)}>Delete</button>
-          <Link className="btn-secondary" to="/companies">Back to list</Link>
+          <Link className="btn-secondary" to="/admin/companies">Back to list</Link>
           <Link className="btn-primary" to="/admin">Home</Link>
         </div>
       </div>
