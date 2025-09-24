@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { requireAuth } from "../../../infra/auth/session.js";
 import { requireRole } from "../middlewares/role.guard.js";
-import { listManagers, updateManager, getManager, createManager, deleteManager } from "../controllers/admin.controller.js";
+import { listManagers, updateManager, getManager, createManager, deleteManager, getMyAdminInfo } from "../controllers/admin.controller.js";
 
 const r = Router();
 
+r.get("/me", requireAuth, requireRole("Admin"), getMyAdminInfo)
 r.get("/managers", requireAuth, requireRole("Admin"), listManagers);
 r.get("/managers/:id", requireAuth, requireRole("Admin"), getManager);
 r.put("/managers/:id", requireAuth, requireRole("Admin"), updateManager);

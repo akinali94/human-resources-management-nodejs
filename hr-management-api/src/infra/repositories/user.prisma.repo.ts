@@ -153,4 +153,12 @@ export class UserPrismaRepo implements UserRepo {
         });
         return rows.map(mapUser)
     }
+
+    async listEmployeesByCompany(companyId: string): Promise<User[]>{
+        const rows = await prisma.user.findMany({
+            where: { role: "Employee", companyId: companyId },
+            orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+        });
+        return rows.map(mapUser)
+    }
 }

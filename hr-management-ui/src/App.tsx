@@ -13,6 +13,10 @@ import ManagerLayout from "./pages/manager/ManagerLayout";
 import ManagerLanding from "./pages/manager/ManagerLanding";
 import Home from "./pages/Home";
 import './App.css'
+import EmployeesList from "./pages/manager/employees/EmployeesList";
+import EmployeeDetails from "./pages/manager/employees/EmployeeDetails";
+import EmployeeCreate from "./pages/manager/employees/EmployeeCreate";
+import EmployeeEdit from "./pages/manager/employees/EmployeeEdit";
 
 
 
@@ -38,6 +42,10 @@ function App() {
       {/* Manager Routes */}
       <Route path="/manager" element={<ManagerLayout />}>
         <Route index element={<ManagerLanding />} />
+        <Route path="employees" element={<EmployeesList />} />
+        <Route path="employees/new" element={<EmployeeCreate />} />
+        <Route path="employees/:id" element={<EmployeeDetails />} />
+        <Route path="employees/:id/edit" element={<EmployeeEdit />} />
         
       </Route>
 

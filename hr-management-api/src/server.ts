@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./app/http/routes/auth.routes.js"
 import employeesRoutes from "./app/http/routes/employees.routes.js"
 import adminRoutes from "./app/http/routes/admin.routes.js";
+import managerRoutes from "./app/http/routes/manager.routes.js"
 import leaveRequestsRoutes from "./app/http/routes/leave-requests.routes.js";
 import leaveTypesRoutes from "./app/http/routes/leave-types.routes.js";
 import expendituresRoutes from "./app/http/routes/expenditures.routes.js";
@@ -26,6 +27,7 @@ app.options("*", cors(corsOptions));
 app.use("/api/auth", authRoutes);
 app.use("/api/employees", employeesRoutes)
 app.use("/api/admin", adminRoutes);
+app.use("/api/manager", managerRoutes);
 app.use("/api/leave-requests", leaveRequestsRoutes);
 app.use("/api/leave-types", leaveTypesRoutes);
 app.use("/api/expenditures", expendituresRoutes);

@@ -54,7 +54,7 @@ export default function ManagerLayout() {
             <NavLink to="/manager/employees/new" className="nav-link">
               ➕<span>Add Employee</span>
             </NavLink>
-            <NavLink to="/manager/employee" className="nav-link">
+            <NavLink to="/manager/employees" className="nav-link">
               📋<span>Employee List</span>
             </NavLink>
           </div>
