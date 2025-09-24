@@ -9,8 +9,11 @@ import CompaniesList from "./pages/admin/companies/CompaniesList";
 import CompanyCreate from "./pages/admin/companies/CompanyCreate";
 import CompanyDetails from "./pages/admin/companies/CompanyDetails";
 import CompanyEdit from "./pages/admin/companies/CompanyEdit";
+import ManagerLayout from "./pages/manager/ManagerLayout";
+import ManagerLanding from "./pages/manager/ManagerLanding";
 import Home from "./pages/Home";
 import './App.css'
+
 
 
 function App() {
@@ -18,7 +21,9 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />}></Route>
-      <Route path="/admin" element={<AdminLayout />} >
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminLanding />} />
         <Route path="managers" element={<ManagersList />} />
         <Route path="managers/new" element={<ManagerCreate />} />
@@ -28,6 +33,12 @@ function App() {
         <Route path="companies/:id" element={<CompanyDetails />} />
         <Route path="companies/:id/edit" element={<CompanyEdit />} />
         <Route path="companies/new" element={<CompanyCreate />} />
+      </Route>
+
+      {/* Manager Routes */}
+      <Route path="/manager" element={<ManagerLayout />}>
+        <Route index element={<ManagerLanding />} />
+        
       </Route>
 
       {/* 404 */}

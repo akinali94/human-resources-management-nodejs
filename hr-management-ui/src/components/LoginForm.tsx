@@ -26,8 +26,8 @@ export default function LoginForm() {
 
       // 3) Role-based redirect
       if (me.role === "Admin") nav("/admin", { replace: true });
-      else if (me.role === "Manager") nav("/manager/leaves", { replace: true });
-      else nav("/leaves", { replace: true });
+      else if (me.role === "Manager") nav("/manager", { replace: true });
+      else nav("/", { replace: true });
     } catch (err: any) {
       setError(err?.message || "Giriş başarısız.");
     } finally {

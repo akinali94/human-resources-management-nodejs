@@ -14,7 +14,8 @@ export default function Home() {
         const me = await apiFetch<Me>("/api/auth/me");
         if (ignore) return;
         if (me.role === "Admin") nav("/admin", { replace: true });
-        else if (me.role === "Manager") nav("/manager/leaves", { replace: true });
+        else if (me.role === "Manager") nav("/manager", { replace: true });
+        else if (me.role === "Employee") nav("/employee", { replace: true });
         else nav("/leaves", { replace: true });
       } catch {
         // if 401, stay same page
