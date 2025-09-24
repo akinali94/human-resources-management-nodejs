@@ -56,15 +56,19 @@ export default function UserMenu({ me }: Props) {
           <Link to="/admin" role="menuitem" className="item" onClick={() => setOpen(false)}>Profile</Link>
 
           <div className="submenu">
-            <div className="item label" aria-disabled>Manager</div>
-            <Link to="/admin/managers/new" role="menuitem" className="item" onClick={() => setOpen(false)}>Add</Link>
-            <Link to="/admin/managers" role="menuitem" className="item" onClick={() => setOpen(false)}>List</Link>
+            <div className="item label" aria-disabled>Employee</div>
+            <Link to="/manager/employees/new" role="menuitem" className="item" onClick={() => setOpen(false)}>Add</Link>
+            <Link to="/manager/employees" role="menuitem" className="item" onClick={() => setOpen(false)}>List</Link>
           </div>
 
           <div className="submenu">
-            <div className="item label" aria-disabled>Company</div>
-            <Link to="/admin/companies/new" role="menuitem" className="item" onClick={() => setOpen(false)}>Add</Link>
-            <Link to="/admin/companies" role="menuitem" className="item" onClick={() => setOpen(false)}>List</Link>
+            <div className="item label" aria-disabled>Leaves</div>
+            <Link to="/manager/leaves" role="menuitem" className="item" onClick={() => setOpen(false)}>List</Link>
+          </div>
+
+          <div className="submenu">
+            <div className="item label" aria-disabled>Expenditures</div>
+            <Link to="/manager/expenditures" role="menuitem" className="item" onClick={() => setOpen(false)}>List</Link>
           </div>
 
           <button className="item danger" role="menuitem" onClick={() => { setOpen(false); setShowConfirm(true); }}>

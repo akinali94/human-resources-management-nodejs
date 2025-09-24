@@ -45,7 +45,15 @@ export async function apiFetch<T>(
 export type Me = {
   id: string;
   email: string;
-  role: "Admin" | "Manager" | "Employee";
   firstName: string;
   lastName: string;
+  role: string;
+  secondName: string;
+  secondLastName: string;
+  title: string;
+  section: string;
+  phoneNo: string;
+  address: string;
+  companyName: string;
+  imageUrl: string;
 };

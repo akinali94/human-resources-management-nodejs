@@ -16,7 +16,7 @@ import './App.css'
 import EmployeesList from "./pages/manager/employees/EmployeesList";
 import EmployeeDetails from "./pages/manager/employees/EmployeeDetails";
 import EmployeeCreate from "./pages/manager/employees/EmployeeCreate";
-import EmployeeEdit from "./pages/manager/employees/EmployeeEdit";
+import EmployeeEdit from "./pages/manager/employees/EmployeeEdit"
 
 
 

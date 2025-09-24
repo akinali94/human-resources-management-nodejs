@@ -109,8 +109,6 @@ export function UserLimitedInfoDto(u: User) {
     role: u.role,
     secondName: u.secondName ?? null,
     secondLastName: u.secondLastName ?? null,
-    birthPlace: u.birthPlace ?? null,
-    identityNumber: u.identityNumber ?? null,
     title: u.title,
     section: u.section,
     phoneNo: u.phoneNo,
